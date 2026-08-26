@@ -51,7 +51,7 @@ Out of scope:
 |-- files/
 |   |-- etc/         # copied to /etc, same paths
 |   `-- home/        # copied to $HOME, same paths
-`-- docs/            # notes on decisions and the dotfile cleanup
+`-- docs/            # decisions, dotfile cleanup, handover
 ```
 
 No inventory file; the playbook targets `localhost` with a local connection.
