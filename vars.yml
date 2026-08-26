@@ -6,7 +6,7 @@ rpmfusion_url: https://mirrors.rpmfusion.org
 
 locale: en_DK.UTF-8
 swap_size: 16g
-bees_db_size: 512             # MiB, hash table; multiple of 128 KiB
+bees_db_size: 1024             # MiB, hash table; multiple of 128 KiB
 zstd_level: 3                 # Btrfs compression level, Fedora ships 1
 
 # Packages that replace their Fedora counterparts (needs allowerasing).
@@ -15,75 +15,64 @@ packages_freeworld:
   - mesa-va-drivers-freeworld   # VA-API for h264/hevc on the RX 6800
 
 packages:
-  # C/C++ toolchain
-  - gcc
-  - gcc-c++
-  - clang
-  - clang-tools-extra           # clangd, clang-format, clang-tidy
-  - lld
-  - lldb
-  - gdb
-  - make
-  - cmake
-  - ninja-build
-  - meson
-  - ccache
-  - bear                        # compile_commands.json for clangd
-  - valgrind
-  - strace
-  - perf
-  - cppcheck
-  - libasan
-  - libubsan
   - autoconf
   - automake
+  - bear                        # compile_commands.json for clangd
+  - bees
+  - btrfs-assistant
+  - btrfs-progs
+  - ccache
+  - clang
+  - clang-tools-extra
+  - cmake
+  - compsize
+  - cppcheck
+  - fd-find
+  - gcc
+  - gcc-c++
+  - gdb
+  - git
+  - git-credential-libsecret
+  - git-lfs
+  - glibc-langpack-en
+  - gnupg2
+  - htop
+  - jq
+  - libasan
   - libtool
+  - libubsan
+  - libvirt
+  - lld
+  - lldb
+  - make
+  - man-pages
+  - meson
+  - ninja-build
+  - perf
+  - pipx
   - pkgconf
-
-  # Languages and containers
+  - podman
+  - podman-compose
+  - pv
   - python3
   - python3-devel
   - python3-pip
-  - pipx
-  - uv                          # venvs as reflinks, see .config/uv/uv.toml
-  - podman
-  - podman-compose
-
-  # Editor and shell
-  - vim-enhanced
+  - qemu-kvm
+  - radeontop
+  - rclone
+  - ripgrep
+  - snapper
+  - steam-devices               # udev rules for controllers (Steam flatpak)
+  - strace
+  - tmux
+  - uv
+  - valgrind
   - vim-X11                     # vimx: +clipboard, works via XWayland
+  - vim-enhanced
+  - virt-manager
   - wl-clipboard
   - zsh
-  - git
-  - git-lfs
-  - git-credential-libsecret
-  - tmux
-  - htop
-  - ripgrep
-  - fd-find
-  - jq
-  - man-pages
-  - rclone                      # used by the gd shell functions
   - zstd
-
-  # Virtualization
-  - virt-manager
-  - libvirt
-  - qemu-kvm
-
-  # Btrfs
-  - btrfs-progs
-  - btrfs-assistant
-  - snapper
-  - compsize
-  - bees                        # continuous dedup, see docs/decisions.md
-
-  # Hardware
-  - steam-devices               # udev rules for controllers (Steam flatpak)
-  - radeontop
-
-  # Locale
-  - glibc-langpack-en
 
   # Needed by this playbook
   - ansible-core
