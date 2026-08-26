@@ -99,6 +99,7 @@ flatpaks:
   - com.discordapp.Discord
   - org.mozilla.Thunderbird
   - com.spotify.Client
+  - org.signal.Signal
 
 services:
   - zswap.service
