@@ -90,6 +90,20 @@ Sources: Chris Down, "Debunking zswap and zram myths" (2026-03-24) and
 `CONFIG_CRYPTO_ZSTD=m`); Fedora change "SwapOnZRAM"; btrfs-progs
 Swapfile documentation.
 
+## Locale
+
+`en_DK.UTF-8`: English messages, 24-hour clock, ISO 8601 dates
+(2026-08-26), metric, A4, Monday first. `LANG` is set system-wide in
+`/etc/locale.conf` and the GNOME region key (`org.gnome.system.locale
+region`) is set so the session formats match without a trip through
+Settings. `clock-format` is pinned to 24h since GNOME derives it from
+the locale only on first login.
+
+If dd/mm/yyyy matters more than ISO, `en_IE.UTF-8` is the closest glibc
+locale (`%d/%m/%y`, 24-hour, no AM/PM); `en_GB` has the same date but
+defines an AM/PM format so GNOME may pick 12h. Change `locale` in
+`vars.yml`. Takes effect at next login.
+
 ## Ansible
 
 - No inventory file; `ansible.cfg` silences the implicit-localhost warning.

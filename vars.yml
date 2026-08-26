@@ -4,6 +4,7 @@
 
 rpmfusion_url: https://mirrors.rpmfusion.org
 
+locale: en_DK.UTF-8
 swap_size: 16g
 
 # Packages that replace their Fedora counterparts (needs allowerasing).
@@ -78,6 +79,9 @@ packages:
   - steam-devices               # udev rules for controllers (Steam flatpak)
   - radeontop
 
+  # Locale
+  - glibc-langpack-en
+
   # Needed by this playbook
   - ansible-core
   - ansible-collection-community-general
@@ -108,6 +112,11 @@ user_groups:
   - libvirt
 
 dconf:
+  # Region (date, time, numbers, paper) for the GNOME session
+  - key: /org/gnome/system/locale/region
+    value: "'{{ locale }}'"
+  - key: /org/gnome/desktop/interface/clock-format
+    value: "'24h'"
   - key: /org/gnome/desktop/interface/clock-show-weekday
     value: "true"
   - key: /org/gnome/desktop/peripherals/mouse/accel-profile

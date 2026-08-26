@@ -36,6 +36,15 @@
     state: absent
   notify: Stop zram
 
+- name: Set system locale
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: ^LANG=
+    line: LANG={{ locale }}
+    create: true
+    mode: "0644"
+
 - name: Check that / is Btrfs
   ansible.builtin.assert:
     that: root_mount['fstype'] == 'btrfs'
