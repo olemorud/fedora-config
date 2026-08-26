@@ -24,9 +24,10 @@
       ansible.builtin.command: sysctl --system
       changed_when: true
 
-    - name: Restart zram
+    # The generated unit is gone once the package is removed, so this only
+    # frees the device in the running session; the reboot does the rest.
+    - name: Stop zram
       become: true
-      ansible.builtin.systemd_service:
-        name: systemd-zram-setup@zram0.service
-        state: restarted
-        daemon_reload: true
+      ansible.builtin.command: swapoff /dev/zram0
+      changed_when: true
+      failed_when: false

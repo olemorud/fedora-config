@@ -29,13 +29,45 @@
     allowerasing: true
     state: present
 
-- name: Configure zram
+- name: Remove packages
+  become: true
+  ansible.builtin.dnf5:
+    name: "{{ packages_absent }}"
+    state: absent
+  notify: Stop zram
+
+- name: Check that / is Btrfs
+  ansible.builtin.assert:
+    that: root_mount['fstype'] == 'btrfs'
+    fail_msg: / is not Btrfs; adjust the swap file tasks
+    quiet: true
+  vars:
+    root_mount: >-
+      {{ ansible_facts['mounts'] | selectattr('mount', 'equalto', '/')
+      | first }}
+
+- name: Create swap subvolume
+  become: true
+  ansible.builtin.shell: btrfs subvolume create /swap && chmod 0700 /swap
+  args:
+    creates: /swap
+
+- name: Create swap file
+  become: true
+  ansible.builtin.command: >-
+    btrfs filesystem mkswapfile --size {{ swap_size }} /swap/swapfile
+  args:
+    creates: /swap/swapfile
+
+- name: Install systemd units
   become: true
   ansible.builtin.copy:
-    src: etc/systemd/zram-generator.conf
-    dest: /etc/systemd/zram-generator.conf
+    src: etc/systemd/system/{{ item }}
+    dest: /etc/systemd/system/{{ item }}
     mode: "0644"
-  notify: Restart zram
+  loop:
+    - zswap.service
+    - swap-swapfile.swap
 
 - name: Tune sysctl
   become: true
@@ -51,6 +83,7 @@
     name: "{{ item }}"
     enabled: true
     state: started
+    daemon_reload: true
   loop: "{{ services }}"
 
 - name: Add user to groups

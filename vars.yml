@@ -4,6 +4,8 @@
 
 rpmfusion_url: https://mirrors.rpmfusion.org
 
+swap_size: 16g
+
 # Packages that replace their Fedora counterparts (needs allowerasing).
 packages_freeworld:
   - ffmpeg                      # replaces ffmpeg-free
@@ -84,14 +86,20 @@ packages:
   - yamllint
   - ShellCheck
 
+# zram is replaced by zswap plus a swap file, see docs/decisions.md.
+packages_absent:
+  - zram-generator-defaults
+
 flatpaks:
   - com.valvesoftware.Steam
   - com.discordapp.Discord
   - org.mozilla.Thunderbird
   - com.spotify.Client
 
-# Modular libvirt daemons; libvirtd.service is deprecated.
 services:
+  - zswap.service
+  - swap-swapfile.swap
+  # Modular libvirt daemons; libvirtd.service is deprecated.
   - virtqemud.socket
   - virtnetworkd.socket
   - virtstoraged.socket

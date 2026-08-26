@@ -60,7 +60,7 @@ Split a task file only when it becomes hard to read.
 ## Usage
 
 ```
-# First time on a fresh install
+# First time on a fresh install, then reboot once
 curl -fsSL <repo-raw-url>/bootstrap.sh | bash
 
 # Afterwards

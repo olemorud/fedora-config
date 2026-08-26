@@ -1,0 +1,18 @@
+# zswap is built into the Fedora kernel but off by default. It is enabled
+# here instead of on the kernel command line because zstd is a module and
+# is not loadable that early; setting the compressor at boot would silently
+# fall back to lzo.
+[Unit]
+Description=Enable zswap
+DefaultDependencies=no
+ConditionPathExists=/sys/module/zswap
+Before=swap.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/sh -c 'echo zstd > /sys/module/zswap/parameters/compressor'
+ExecStart=/usr/bin/sh -c 'echo 1 > /sys/module/zswap/parameters/enabled'
+
+[Install]
+WantedBy=swap.target
