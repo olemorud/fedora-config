@@ -1,0 +1,4 @@
+# Install into venvs as reflinks from the global cache. uv defaults to
+# hardlinks on Linux, which share space too but let an edit inside one
+# venv silently change the cached copy. Btrfs supports reflinks.
+link-mode = "clone"

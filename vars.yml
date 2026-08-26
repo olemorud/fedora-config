@@ -43,6 +43,7 @@ packages:
   - python3-devel
   - python3-pip
   - pipx
+  - uv                          # venvs as reflinks, see .config/uv/uv.toml
   - podman
   - podman-compose
 
