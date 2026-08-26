@@ -129,6 +129,7 @@
     name: beesd@{{ root_mount['uuid'] }}.service
     enabled: true
     state: started
+    daemon_reload: true
 
 - name: Tune sysctl
   become: true
