@@ -65,15 +65,17 @@
     create: true
     mode: "0644"
 
-- name: Check that / is Btrfs
-  ansible.builtin.assert:
-    that: root_mount['fstype'] == 'btrfs'
-    fail_msg: / is not Btrfs; adjust the swap file tasks
-    quiet: true
-  vars:
+- name: Find the root filesystem
+  ansible.builtin.set_fact:
     root_mount: >-
       {{ ansible_facts['mounts'] | selectattr('mount', 'equalto', '/')
       | first }}
+
+- name: Check that / is Btrfs
+  ansible.builtin.assert:
+    that: root_mount['fstype'] == 'btrfs'
+    fail_msg: / is not Btrfs; adjust the swap and bees tasks
+    quiet: true
 
 - name: Create swap subvolume
   become: true
@@ -97,6 +99,26 @@
   loop:
     - zswap.service
     - swap-swapfile.swap
+
+- name: Configure bees
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/bees/root.conf
+    content: |
+      # The filesystem holding / and /home. bees mounts the top-level
+      # subvolume itself and skips nodatacow files (VM images, swap).
+      UUID={{ root_mount['uuid'] }}
+      DB_SIZE=$(({{ bees_db_size }}*1024*1024))
+      OPTIONS="--thread-count 4"
+    mode: "0644"
+  notify: Restart bees
+
+- name: Enable bees
+  become: true
+  ansible.builtin.systemd_service:
+    name: beesd@{{ root_mount['uuid'] }}.service
+    enabled: true
+    state: started
 
 - name: Tune sysctl
   become: true

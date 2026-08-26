@@ -6,6 +6,7 @@ rpmfusion_url: https://mirrors.rpmfusion.org
 
 locale: en_DK.UTF-8
 swap_size: 16g
+bees_db_size: 512             # MiB, hash table; multiple of 128 KiB
 
 # Packages that replace their Fedora counterparts (needs allowerasing).
 packages_freeworld:
@@ -74,7 +75,7 @@ packages:
   - btrfs-assistant
   - snapper
   - compsize
-  - duperemove
+  - bees                        # continuous dedup, see docs/decisions.md
 
   # Hardware
   - steam-devices               # udev rules for controllers (Steam flatpak)
