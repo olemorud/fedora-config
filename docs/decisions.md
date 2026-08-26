@@ -182,6 +182,27 @@ compression and sharing are actually saving.
 - dconf values are GVariant strings, so quoting in `vars.yml` matters:
   `"'flat'"` is a string, `"true"` is a boolean.
 
+## Machine-specific vs machine-independent split
+
+Two mechanisms, chosen so that a second machine never requires
+restructuring:
+
+- `machine.yml` holds values sized to the hardware (swap, bees db) and
+  hardware-only packages. It is loaded after `vars.yml`, so on a key
+  collision the machine value wins. Ansible does not merge lists across
+  vars files, so machine packages are separate lists
+  (`packages_machine`, `packages_freeworld_machine`) that the install
+  tasks concatenate. This avoids `hash_behaviour=merge`, which is
+  global, deprecated in spirit and a well-known footgun.
+- `tasks/machine.yml` holds hardware workarounds. Every block is gated
+  on facts (`ansible_facts['board_name']` etc.), never on file layout,
+  so running the playbook on the wrong machine is a no-op rather than
+  a misconfiguration. It is imported first, so its `flush_handlers`
+  only ever flushes its own notifications.
+
+No inventory, no host_vars, no roles; that machinery pays off with a
+fleet, not with one desktop and maybe a second machine one day.
+
 ## Suspend: Gigabyte B550 GPP0 wakeup bug
 
 The B550I AORUS PRO AX (and most other Gigabyte B550/B650 boards)

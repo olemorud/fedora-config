@@ -43,8 +43,10 @@ Out of scope:
 .
 |-- bootstrap.sh     # installs git + ansible, clones, runs playbook
 |-- playbook.yml     # includes the task files below, in order
-|-- vars.yml         # packages, flatpaks, services, dconf settings
+|-- vars.yml         # machine-independent: packages, flatpaks, dconf
+|-- machine.yml      # machine-specific: sizes, hardware packages
 |-- tasks/
+|   |-- machine.yml  # hardware workarounds, gated on facts
 |   |-- system.yml   # repos, packages, services, /etc
 |   |-- desktop.yml  # flatpaks, dconf
 |   `-- user.yml     # shell, git, user files
@@ -56,6 +58,9 @@ Out of scope:
 
 No inventory file; the playbook targets `localhost` with a local connection.
 Split a task file only when it becomes hard to read.
+
+For a different machine, edit `machine.yml` and review
+`tasks/machine.yml`; everything else should apply as is.
 
 ## Usage
 

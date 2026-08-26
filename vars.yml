@@ -1,18 +1,16 @@
 ---
 # Everything that is a list lives here. Task files should not need editing
-# when adding or removing a package.
+# when adding or removing a package. Machine-specific values are in
+# machine.yml.
 
 rpmfusion_url: https://mirrors.rpmfusion.org
 
 locale: en_DK.UTF-8
-swap_size: 16g
-bees_db_size: 1024             # MiB, hash table; multiple of 128 KiB
 zstd_level: 3                 # Btrfs compression level, Fedora ships 1
 
 # Packages that replace their Fedora counterparts (needs allowerasing).
 packages_freeworld:
   - ffmpeg                      # replaces ffmpeg-free
-  - mesa-va-drivers-freeworld   # VA-API for h264/hevc on the RX 6800
 
 packages:
   - autoconf
@@ -58,7 +56,6 @@ packages:
   - python3-devel
   - python3-pip
   - qemu-kvm
-  - radeontop
   - rclone
   - ripgrep
   - snapper

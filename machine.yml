@@ -1,0 +1,19 @@
+---
+# Everything specific to this machine: values sized to the hardware and
+# packages that only make sense on it. Setting up a different machine
+# should only require editing this file (and vars.yml for taste).
+# Hardware workarounds live in tasks/machine.yml, gated on facts.
+#
+# This box: Ryzen 7 5700X3D, RX 6800, 32 GiB RAM, 960 GB NVMe,
+# Gigabyte B550I AORUS PRO AX.
+
+swap_size: 16g                  # half of RAM
+bees_db_size: 1024              # MiB, hash table; multiple of 128 KiB
+
+# Installed together with `packages`.
+packages_machine:
+  - radeontop                   # AMD GPU monitor
+
+# Installed together with `packages_freeworld` (allowerasing).
+packages_freeworld_machine:
+  - mesa-va-drivers-freeworld   # VA-API for h264/hevc on the RX 6800

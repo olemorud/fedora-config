@@ -4,8 +4,13 @@
   connection: local
   vars_files:
     - vars.yml
+    - machine.yml
 
   tasks:
+    - name: Machine
+      ansible.builtin.import_tasks: tasks/machine.yml
+      tags: [machine]
+
     - name: System
       ansible.builtin.import_tasks: tasks/system.yml
       tags: [system]

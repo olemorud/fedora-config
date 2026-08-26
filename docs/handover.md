@@ -30,7 +30,9 @@ is `github.com/olemorud/fedora-config`.
 
 - `vars.yml` is the only file that should need editing for routine
   changes: packages, packages to remove, flatpaks, services, groups,
-  dconf keys, `locale`, `swap_size`.
+  dconf keys, `locale`. `machine.yml` holds hardware-sized values
+  (`swap_size`, `bees_db_size`) and hardware-only package lists;
+  `tasks/machine.yml` holds hardware workarounds, gated on facts.
 - `tasks/system.yml` runs with `become`; `tasks/user.yml` never does.
 - `files/etc/` mirrors `/etc`; `files/home/` is copied as a tree into
   `$HOME` by a single task, so adding a dotfile is a file drop.
@@ -54,7 +56,9 @@ is `github.com/olemorud/fedora-config`.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
 - No vim plugins at all, by request.
 - Suspend fix: `fix-suspend.service` disables GPP0 wakeup at boot
-  (Gigabyte B550 ACPI firmware bug).
+  (Gigabyte B550 ACPI firmware bug), in `tasks/machine.yml`.
+- Machine-specific config split into `machine.yml` (vars) and
+  `tasks/machine.yml` (fact-gated workarounds); see decisions.md.
 - Removed from scope by the owner: chezmoi, toolbx/distrobox, any
   dotfile manager.
 
