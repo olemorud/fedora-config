@@ -21,6 +21,7 @@
   ansible.builtin.dnf5:
     name: "{{ packages }}"
     state: present
+  notify: Reload udev
 
 - name: Install freeworld packages
   become: true
