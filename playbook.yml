@@ -19,18 +19,6 @@
       tags: [user]
 
   handlers:
-    # New udev rules (steam-devices) only apply to already-present devices
-    # after a trigger. This is what gives the seat user access to
-    # /dev/uinput, which the Steam flatpak checks at start.
-    - name: Reload udev
-      become: true
-      ansible.builtin.shell: >-
-        udevadm control --reload &&
-        udevadm trigger --action=change
-        --subsystem-match=misc --subsystem-match=input
-        --subsystem-match=hidraw
-      changed_when: true
-
     - name: Reload sysctl
       become: true
       ansible.builtin.command: sysctl --system

@@ -21,7 +21,26 @@
   ansible.builtin.dnf5:
     name: "{{ packages }}"
     state: present
-  notify: Reload udev
+
+# The steam-devices rules tag /dev/uinput with "uaccess", which is what
+# lets the seat user open it. Rules only apply to a device that already
+# exists after a trigger, and a package that was installed earlier never
+# triggers one, so check the tag instead of relying on a package change.
+- name: Read uinput udev tags
+  ansible.builtin.command: udevadm info /dev/uinput
+  register: uinput_info
+  changed_when: false
+  failed_when: false
+
+- name: Apply udev rules to present devices
+  become: true
+  ansible.builtin.shell: >-
+    udevadm control --reload &&
+    udevadm trigger --action=change
+    --subsystem-match=misc --subsystem-match=input
+    --subsystem-match=hidraw
+  changed_when: true
+  when: "'uaccess' not in uinput_info.stdout"
 
 - name: Install freeworld packages
   become: true
