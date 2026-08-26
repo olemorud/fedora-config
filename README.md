@@ -43,12 +43,15 @@ Out of scope:
 .
 |-- bootstrap.sh     # installs git + ansible, clones, runs playbook
 |-- playbook.yml     # includes the task files below, in order
-|-- vars.yml         # packages, copr repos, flatpaks, dconf settings
+|-- vars.yml         # packages, flatpaks, services, dconf settings
 |-- tasks/
 |   |-- system.yml   # repos, packages, services, /etc
 |   |-- desktop.yml  # flatpaks, dconf
 |   `-- user.yml     # shell, git, user files
-`-- files/           # config files copied verbatim
+|-- files/
+|   |-- etc/         # copied to /etc, same paths
+|   `-- home/        # copied to $HOME, same paths
+`-- docs/            # notes on decisions and the dotfile cleanup
 ```
 
 No inventory file; the playbook targets `localhost` with a local connection.
@@ -61,11 +64,14 @@ Split a task file only when it becomes hard to read.
 curl -fsSL <repo-raw-url>/bootstrap.sh | bash
 
 # Afterwards
-ansible-playbook -K playbook.yml
+make apply     # ansible-playbook -K playbook.yml
+make check     # dry run with diff
+make lint      # yamllint, ansible-lint, syntax check, shellcheck
 ```
 
 ## Maintenance
 
-- Run the playbook after every change and commit only when it passes.
+- Run `make lint` and the playbook after every change; commit only when
+  both pass.
 - Run it once after each Fedora upgrade and fix what broke.
 - Review the package lists occasionally and remove what is unused.
