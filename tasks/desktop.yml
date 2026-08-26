@@ -1,0 +1,23 @@
+---
+- name: Add Flathub
+  become: true
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    state: present
+
+- name: Install flatpaks
+  become: true
+  community.general.flatpak:
+    name: "{{ flatpaks }}"
+    remote: flathub
+    state: present
+
+- name: Apply dconf settings
+  community.general.dconf:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop: "{{ dconf }}"
+  loop_control:
+    label: "{{ item.key }}"

@@ -1,0 +1,32 @@
+---
+- name: Configure this Fedora Workstation
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: System
+      ansible.builtin.import_tasks: tasks/system.yml
+      tags: [system]
+
+    - name: Desktop
+      ansible.builtin.import_tasks: tasks/desktop.yml
+      tags: [desktop]
+
+    - name: User
+      ansible.builtin.import_tasks: tasks/user.yml
+      tags: [user]
+
+  handlers:
+    - name: Reload sysctl
+      become: true
+      ansible.builtin.command: sysctl --system
+      changed_when: true
+
+    - name: Restart zram
+      become: true
+      ansible.builtin.systemd_service:
+        name: systemd-zram-setup@zram0.service
+        state: restarted
+        daemon_reload: true

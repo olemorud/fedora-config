@@ -1,0 +1,110 @@
+---
+# Everything that is a list lives here. Task files should not need editing
+# when adding or removing a package.
+
+rpmfusion_url: https://mirrors.rpmfusion.org
+
+# Packages that replace their Fedora counterparts (needs allowerasing).
+packages_freeworld:
+  - ffmpeg                      # replaces ffmpeg-free
+  - mesa-va-drivers-freeworld   # VA-API for h264/hevc on the RX 6800
+
+packages:
+  # C/C++ toolchain
+  - gcc
+  - gcc-c++
+  - clang
+  - clang-tools-extra           # clangd, clang-format, clang-tidy
+  - lld
+  - lldb
+  - gdb
+  - make
+  - cmake
+  - ninja-build
+  - meson
+  - ccache
+  - bear                        # compile_commands.json for clangd
+  - valgrind
+  - strace
+  - perf
+  - cppcheck
+  - libasan
+  - libubsan
+  - autoconf
+  - automake
+  - libtool
+  - pkgconf
+
+  # Languages and containers
+  - python3
+  - python3-devel
+  - python3-pip
+  - pipx
+  - podman
+  - podman-compose
+
+  # Editor and shell
+  - vim-enhanced
+  - vim-X11                     # vimx: +clipboard, works via XWayland
+  - wl-clipboard
+  - zsh
+  - git
+  - git-lfs
+  - git-credential-libsecret
+  - tmux
+  - htop
+  - ripgrep
+  - fd-find
+  - jq
+  - man-pages
+  - rclone                      # used by the gd shell functions
+  - zstd
+
+  # Virtualization
+  - virt-manager
+  - libvirt
+  - qemu-kvm
+
+  # Btrfs
+  - btrfs-progs
+  - btrfs-assistant
+  - snapper
+  - compsize
+  - duperemove
+
+  # Hardware
+  - steam-devices               # udev rules for controllers (Steam flatpak)
+  - radeontop
+
+  # Needed by this playbook
+  - ansible-core
+  - ansible-collection-community-general
+  - python3-psutil              # community.general.dconf
+  - python3-ansible-lint
+  - yamllint
+  - ShellCheck
+
+flatpaks:
+  - com.valvesoftware.Steam
+  - com.discordapp.Discord
+  - org.mozilla.Thunderbird
+  - com.spotify.Client
+
+# Modular libvirt daemons; libvirtd.service is deprecated.
+services:
+  - virtqemud.socket
+  - virtnetworkd.socket
+  - virtstoraged.socket
+
+user_groups:
+  - libvirt
+
+dconf:
+  - key: /org/gnome/desktop/interface/clock-show-weekday
+    value: "true"
+  - key: /org/gnome/desktop/peripherals/mouse/accel-profile
+    value: "'flat'"
+  - key: /org/gnome/desktop/wm/preferences/button-layout
+    value: "'appmenu:minimize,maximize,close'"
+  - key: /org/gnome/mutter/experimental-features
+    value: "['variable-refresh-rate']"

@@ -1,0 +1,62 @@
+---
+- name: Configure dnf
+  become: true
+  ansible.builtin.copy:
+    src: etc/dnf/libdnf5.conf.d/local.conf
+    dest: /etc/dnf/libdnf5.conf.d/local.conf
+    mode: "0644"
+
+- name: Enable RPM Fusion
+  become: true
+  ansible.builtin.dnf5:
+    name: >-
+      {{ rpmfusion_url }}/{{ item }}/fedora/rpmfusion-{{ item }}-release-{{
+      ansible_facts['distribution_major_version'] }}.noarch.rpm
+    disable_gpg_check: true
+    state: present
+  loop: [free, nonfree]
+
+- name: Install packages
+  become: true
+  ansible.builtin.dnf5:
+    name: "{{ packages }}"
+    state: present
+
+- name: Install freeworld packages
+  become: true
+  ansible.builtin.dnf5:
+    name: "{{ packages_freeworld }}"
+    allowerasing: true
+    state: present
+
+- name: Configure zram
+  become: true
+  ansible.builtin.copy:
+    src: etc/systemd/zram-generator.conf
+    dest: /etc/systemd/zram-generator.conf
+    mode: "0644"
+  notify: Restart zram
+
+- name: Tune sysctl
+  become: true
+  ansible.builtin.copy:
+    src: etc/sysctl.d/99-local.conf
+    dest: /etc/sysctl.d/99-local.conf
+    mode: "0644"
+  notify: Reload sysctl
+
+- name: Enable services
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ services }}"
+
+- name: Add user to groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: "{{ user_groups }}"
+    append: true
+    shell: /usr/bin/zsh
