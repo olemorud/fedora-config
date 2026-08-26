@@ -63,7 +63,7 @@ Split a task file only when it becomes hard to read.
 # First time on a fresh install, then reboot once
 curl -fsSL <repo-raw-url>/bootstrap.sh | bash
 
-# Afterwards
+# Afterwards (./bootstrap.sh from the checkout also works)
 make apply     # ansible-playbook -K playbook.yml
 make check     # dry run with diff
 make lint      # yamllint, ansible-lint, syntax check, shellcheck
