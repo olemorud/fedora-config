@@ -13,12 +13,12 @@
     remote: flathub
     state: present
 
-- name: Remove flatpaks
+- name: Install Fedora flatpaks
   become: true
   community.general.flatpak:
-    name: "{{ flatpaks_absent }}"
-    state: absent
-  when: flatpaks_absent | length > 0
+    name: "{{ flatpaks_fedora }}"
+    remote: fedora
+    state: present
 
 - name: Apply dconf settings
   community.general.dconf:

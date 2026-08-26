@@ -86,15 +86,13 @@ packages_absent:
 flatpaks:
   - com.valvesoftware.Steam
   - com.discordapp.Discord
-  - org.mozilla.thunderbird
   - com.spotify.Client
   - org.signal.Signal
   - com.github.tchx84.Flatseal
 
-# Old Thunderbird ESR app ID; the release channel is org.mozilla.thunderbird
-# (lower case). See docs/decisions.md.
-flatpaks_absent:
-  - org.mozilla.Thunderbird
+# From the fedora remote, not Flathub. See docs/decisions.md.
+flatpaks_fedora:
+  - net.thunderbird.Thunderbird
 
 services:
   - zswap.service
