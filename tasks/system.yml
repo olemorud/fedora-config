@@ -100,6 +100,33 @@
     - zswap.service
     - swap-swapfile.swap
 
+# Gigabyte B550 firmware bug: GPP0 wakes the machine immediately after
+# suspend. Only install and enable the workaround on the affected board.
+- name: Install suspend fix (B550I AORUS PRO AX)
+  become: true
+  ansible.builtin.copy:
+    src: etc/systemd/system/fix-suspend.service
+    dest: /etc/systemd/system/fix-suspend.service
+    mode: "0644"
+  when: ansible_facts['board_name'] == 'B550I AORUS PRO AX'
+  register: suspend_unit
+  notify: Reload systemd
+
+- name: Flush handlers before enabling suspend fix
+  ansible.builtin.meta: flush_handlers
+
+# Check mode does not write the unit file, so systemd cannot find it
+# and the enable would fail; skip it only in that case.
+- name: Enable suspend fix (B550I AORUS PRO AX)
+  become: true
+  ansible.builtin.systemd_service:
+    name: fix-suspend.service
+    enabled: true
+    state: started
+  when:
+    - ansible_facts['board_name'] == 'B550I AORUS PRO AX'
+    - not (ansible_check_mode and suspend_unit is changed)
+
 - name: Set Btrfs compression level
   become: true
   ansible.builtin.replace:

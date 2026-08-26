@@ -53,6 +53,8 @@ is `github.com/olemorud/fedora-config`.
   sockets.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
 - No vim plugins at all, by request.
+- Suspend fix: `fix-suspend.service` disables GPP0 wakeup at boot
+  (Gigabyte B550 ACPI firmware bug).
 - Removed from scope by the owner: chezmoi, toolbx/distrobox, any
   dotfile manager.
 
@@ -85,6 +87,8 @@ Not verified, because it needs the real machine:
   scan and its RAM/CPU footprint have not been observed.
 - The fstab edit and remount for zstd:3 (regexp tested on a Fedora-style
   fstab, idempotent on the second pass).
+- `fix-suspend.service`: confirm GPP0 is the wakeup source on this
+  board and that suspend stays asleep after the service runs.
 
 ## Open items
 

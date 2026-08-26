@@ -182,6 +182,34 @@ compression and sharing are actually saving.
 - dconf values are GVariant strings, so quoting in `vars.yml` matters:
   `"'flat'"` is a string, `"true"` is a boolean.
 
+## Suspend: Gigabyte B550 GPP0 wakeup bug
+
+The B550I AORUS PRO AX (and most other Gigabyte B550/B650 boards)
+ships with a firmware bug: the GPP0 PCIe bridge (to the NVMe) is left
+enabled as an ACPI wakeup source. The result is that `systemctl
+suspend` completes and the machine wakes up immediately.
+
+The fix is to toggle GPP0 off in `/proc/acpi/wakeup` at every boot.
+`/proc/acpi/wakeup` is not a normal file; every write toggles the
+named device, so the service checks `grep "GPP0.*enabled"` first and
+only writes when needed.
+
+`fix-suspend.service` is a oneshot unit that runs at
+`multi-user.target`, matching the pattern of `zswap.service`. The
+install and enable tasks are gated on `ansible_facts['board_name']`
+so they only apply to the B550I AORUS PRO AX; a different machine
+gets no unit file and no service. To confirm the issue is GPP0, run:
+
+    cat /proc/acpi/wakeup | grep GPP0
+
+If it says `*enabled`, the bug is present. After the service runs it
+should say `*disabled`.
+
+Sources: ArchWiki "Wakeup triggers"; artemis.sh "Fix Linux
+Suspend/Sleep in Gigabyte B550i Aorus Pro AX" (2023-04-09);
+pliszko.com "Fixing instant wake from suspend on Gigabyte
+motherboards" (2025-07-31).
+
 ## Linting
 
 `make lint` runs yamllint, ansible-lint (production profile), a playbook

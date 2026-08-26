@@ -1,0 +1,17 @@
+# Gigabyte B550 ACPI bug: GPP0 (the PCIe bridge to the NVMe) is left
+# enabled as a wakeup source, causing an immediate wake after suspend.
+# /proc/acpi/wakeup is a toggle, so only write when GPP0 is enabled.
+[Unit]
+Description=Disable GPP0 wakeup (Gigabyte B550 suspend fix)
+DefaultDependencies=no
+ConditionPathExists=/proc/acpi/wakeup
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/sh -c '\
+  grep -q "GPP0.*enabled" /proc/acpi/wakeup \
+  && echo GPP0 > /proc/acpi/wakeup || true'
+
+[Install]
+WantedBy=multi-user.target
