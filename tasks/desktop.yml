@@ -13,6 +13,13 @@
     remote: flathub
     state: present
 
+- name: Remove flatpaks
+  become: true
+  community.general.flatpak:
+    name: "{{ flatpaks_absent }}"
+    state: absent
+  when: flatpaks_absent | length > 0
+
 - name: Apply dconf settings
   community.general.dconf:
     key: "{{ item.key }}"

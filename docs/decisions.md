@@ -14,6 +14,12 @@ Short notes on choices that are not obvious from the code.
 - Flatpak is used for end-user GUI apps. virt-manager is an RPM because it
   needs libvirt on the host. Libvirt uses the modular `virt*d` sockets;
   `libvirtd.service` is deprecated.
+- Thunderbird tracks the release (monthly) channel, not ESR. On Flathub
+  the app IDs split in 2026: `org.mozilla.thunderbird` (lower case) is
+  release, `org.mozilla.thunderbird_esr` is ESR. The old
+  `org.mozilla.Thunderbird` was ESR and is removed via `flatpaks_absent`.
+  Release gets fixes every four weeks instead of yearly (Mozilla support:
+  channel-choices-thunderbird-snap-and-flatpak).
 - `vim-X11` provides `vimx`, the only Fedora vim build with `+clipboard`.
   It runs under XWayland. `alias vim=vimx` lives in the zsh aliases.
 - The lint tools (`python3-ansible-lint`, `yamllint`, `ShellCheck`) are in
