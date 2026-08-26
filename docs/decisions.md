@@ -165,7 +165,10 @@ from eating the disk:
   unique data, 2-4x that on a compressed filesystem) and four worker
   threads at idle I/O and nice 19. It skips nodatacow files, so the swap
   file and libvirt images are untouched. The first full scan takes
-  hours; after that it keeps up incrementally.
+  hours; after that it keeps up incrementally. It runs at `--verbose 4`
+  (warnings and errors); the default of 8 logs every crawl and dedupe
+  and floods the journal. Levels are 0 (silent) to 8 (all), mapping to
+  syslog priorities (bees docs, options.html).
 
 `duperemove` was dropped as redundant. `compsize <path>` shows what
 compression and sharing are actually saving.

@@ -119,7 +119,9 @@
       # subvolume itself and skips nodatacow files (VM images, swap).
       UUID={{ root_mount['uuid'] }}
       DB_SIZE=$(({{ bees_db_size }}*1024*1024))
-      OPTIONS="--thread-count 4"
+      # -v 4 logs warnings and errors only; the default (8) logs every
+      # crawl and dedupe at info/notice, which floods the journal.
+      OPTIONS="--thread-count 4 --verbose 4"
     mode: "0644"
   notify: Restart bees
 
