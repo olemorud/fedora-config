@@ -1,0 +1,26 @@
+[user]
+    name = Ole Morud
+    email = ole-morud-git.football131@simplelogin.com
+    signingkey = ~/.ssh/id_ed25519.pub
+[gpg]
+    format = ssh
+[alias]
+    st = status
+    ci = commit
+    co = checkout
+    lola = log --graph --decorate=full --pretty=oneline --abbrev-commit --all
+    logf = "!echo 'Remember to add -S<string>'; \
+        git log --color -p --source --all"
+[core]
+    editor = vim
+[credential]
+    helper = libsecret
+[branch]
+    autosetuprebase = always
+[init]
+    defaultBranch = master
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
