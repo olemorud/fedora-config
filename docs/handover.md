@@ -42,6 +42,9 @@ is `github.com/olemorud/fedora-config`.
 - zswap in front of a 16 GiB Btrfs swap file, zram removed. Researched
   properly; the owner was sceptical of the first zram-only version and
   was right.
+- Btrfs compression zstd:3 (researched, seamless on this hardware),
+  bees for dedup, uv with reflinks for Python venvs. No recursive
+  defrag ever: it unshares extents.
 - zswap is enabled by `zswap.service`, not a kernel argument, because
   zstd is a module in the Fedora kernel.
 - Locale `en_DK.UTF-8` (24 h, ISO dates). `en_IE` noted as the
@@ -78,6 +81,10 @@ Not verified, because it needs the real machine:
 - The dconf task needs a session bus; run the playbook from a terminal
   inside GNOME, not a tty.
 - The udev trigger for `/dev/uinput` (see below).
+- bees: config rendering was checked; the service itself, the initial
+  scan and its RAM/CPU footprint have not been observed.
+- The fstab edit and remount for zstd:3 (regexp tested on a Fedora-style
+  fstab, idempotent on the second pass).
 
 ## Open items
 

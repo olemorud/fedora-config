@@ -104,6 +104,72 @@ locale (`%d/%m/%y`, 24-hour, no AM/PM); `en_GB` has the same date but
 defines an AM/PM format so GNOME may pick 12h. Change `locale` in
 `vars.yml`. Takes effect at next login.
 
+## Btrfs compression: zstd:3
+
+Fedora mounts `/` and `/home` with `compress=zstd:1`. This config raises
+it to `zstd:3`, the btrfs default. Reasoning:
+
+**How it works.** Compression is a mount option, applied to new writes
+only; existing extents are untouched until rewritten. The option is
+filesystem-wide, so remounting `/` also covers `/home`. Without
+`compress-force`, btrfs tries the first 128 KiB of each file and gives
+up on files that do not shrink, so already-compressed data (game assets,
+media, archives, wheels) costs almost nothing at any level. Decompression
+speed is the same at every zstd level; only writes pay for the level.
+
+**Numbers.** From the btrfs maintainers' own benchmark for the fast-level
+patch (Daniel Vacek, kernel 6.13, Jan 2025), compressed size relative to
+original, level 1 vs 3: binaries 41% vs 39%, docs 39% vs 37%, enwik9 38%
+vs 35%, Linux source 19% vs 18%. Wall time to copy the 1.4 GB source
+tarball: 1.88 s vs 1.97 s, and identical after sync. Level 4 jumps to
+2.17 s for 1 MB gained; the curve is steep from there. Level 3 is the
+knee: 5-8% less space for about 5% more compression time. Nick Terrell's
+original 2017 numbers show the same shape (ratio 2.57 vs 2.71 at 260 vs
+174 MB/s per core, on a 2017 laptop core in a VM).
+
+**Why Fedora picked 1.** The change proposal benchmarked with
+`/dev/urandom` and `/dev/zero`. David Sterba (btrfs maintainer, April
+2025) called that evaluation flawed and said he does not see zstd:1
+clearly winning against zstd:3, with read and write runtimes roughly the
+same.
+
+**This machine.** Eight cores at 4+ GHz do in-kernel zstd:3 at a few
+hundred MB/s per core, and btrfs compresses in parallel, so the ceiling
+is far above anything a desktop writes sustained. Level 3 is seamless
+here. What would not be seamless: recompressing existing data with
+`btrfs filesystem defragment -r -czstd`, because defragmentation
+unshares extents and undoes reflinks and dedup. That is deliberately not
+done; the old data converts as it gets rewritten by updates.
+
+Sources: btrfs docs `Compression`; Vacek, "btrfs: zstd: enable negative
+compression levels mount option" (patch and thread, linux-btrfs, Jan-Feb
+2025); Sterba, reply to "set default zstd compression level to 1 when
+SSD detected" (April 2025); Terrell, "btrfs: Add zstd support" (2017);
+Fedora change "BtrfsTransparentCompression".
+
+## Deduplication: bees, and uv for venvs
+
+Python venvs are full copies of every package. Two things stop that
+from eating the disk:
+
+- `uv` installs from one global cache and, with `link-mode = "clone"`
+  in `~/.config/uv/uv.toml`, links packages into venvs as Btrfs
+  reflinks. Every venv shares extents with the cache from the moment it
+  is created. uv's Linux default is hardlinks, which share space too but
+  make an edit inside one venv change the cached file; reflinks do not.
+- `bees` deduplicates continuously at block level by following the
+  filesystem's own change log, so it also catches pip-made venvs, git
+  worktrees, container layers and whatever else repeats. It runs as
+  `beesd@<uuid>.service` on the filesystem holding `/` and `/home`,
+  with a 512 MiB mlocked hash table (bees docs: 128 MiB per TB of
+  unique data, 2-4x that on a compressed filesystem) and four worker
+  threads at idle I/O and nice 19. It skips nodatacow files, so the swap
+  file and libvirt images are untouched. The first full scan takes
+  hours; after that it keeps up incrementally.
+
+`duperemove` was dropped as redundant. `compsize <path>` shows what
+compression and sharing are actually saving.
+
 ## Ansible
 
 - No inventory file; `ansible.cfg` silences the implicit-localhost warning.

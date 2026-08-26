@@ -19,6 +19,18 @@
       tags: [user]
 
   handlers:
+    - name: Reload systemd
+      become: true
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    # Compression is a filesystem-wide option; remounting / covers /home.
+    # fstab is edited in place above, so the mount module is not wanted.
+    - name: Remount root  # noqa: command-instead-of-module
+      become: true
+      ansible.builtin.command: mount -o remount,compress=zstd:{{ zstd_level }} /
+      changed_when: true
+
     - name: Restart bees
       become: true
       ansible.builtin.systemd_service:
