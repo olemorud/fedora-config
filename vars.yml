@@ -84,12 +84,15 @@ packages:
 packages_absent:
   - zram-generator-defaults
 
+# flathub
 flatpaks:
-  - com.valvesoftware.Steam
+  - app.bluebubbles.BlueBubbles
   - com.discordapp.Discord
-  - com.spotify.Client
-  - org.signal.Signal
   - com.github.tchx84.Flatseal
+  - com.spotify.Client
+  - com.valvesoftware.Steam
+  - org.gnome.Firmware
+  - org.signal.Signal
 
 # From the fedora remote, not Flathub. See docs/decisions.md.
 flatpaks_fedora:
