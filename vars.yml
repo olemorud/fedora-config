@@ -26,6 +26,7 @@ packages:
   - compsize
   - cppcheck
   - fd-find
+  - fio                         # Disk benchmarking
   - gcc
   - gcc-c++
   - gdb
