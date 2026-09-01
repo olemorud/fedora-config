@@ -118,9 +118,11 @@ Not verified, because it needs the real machine:
    it. If not, ask for the output of the four commands listed in the
    chat (rpm -q, grep uinput on the rules file, udevadm info TAGS,
    getfacl) and the `loginctl` seat.
-2. `make check` on a fresh machine fails at "Enable services" because
-   check mode does not create the unit files first. Known, accepted;
-   could be softened with `ignore_errors: "{{ ansible_check_mode }}"`.
+2. Resolved. `make check` used to fail at "Enable services" because
+   check mode installs nothing, so the units do not exist yet. The
+   enable tasks now carry the same guard as the suspend fix in
+   `tasks/machine.yml`: skip when running in check mode and the task
+   that would have created the unit reported a change.
 3. First run after the zswap change needs a reboot to drop zram fully.
    README says so.
 4. The disk is assumed unencrypted or the owner has not said. zswap
@@ -141,7 +143,7 @@ Not verified, because it needs the real machine:
 ```
 edit vars.yml or a task file
 make lint
-make check          # dry run with diff, expect the known failure above
+make check          # dry run with diff
 make apply
 git commit
 ```

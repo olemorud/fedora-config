@@ -43,6 +43,7 @@
   ansible.builtin.dnf5:
     name: "{{ packages + packages_machine }}"
     state: present
+  register: packages_installed
 
 # The steam-devices rules tag /dev/uinput with "uaccess", which is what
 # lets the seat user open it. Rules only apply to a device that already
@@ -118,6 +119,7 @@
     src: etc/systemd/system/{{ item }}
     dest: /etc/systemd/system/{{ item }}
     mode: "0644"
+  register: unit_files
   loop:
     - zswap.service
     - swap-swapfile.swap
@@ -147,6 +149,9 @@
     mode: "0644"
   notify: Restart bees
 
+# Same as the suspend fix in tasks/machine.yml: check mode installs
+# nothing, so a unit that a package would have provided does not exist
+# and systemd cannot be asked about it.
 - name: Enable bees
   become: true
   ansible.builtin.systemd_service:
@@ -154,6 +159,7 @@
     enabled: true
     state: started
     daemon_reload: true
+  when: not (ansible_check_mode and packages_installed is changed)
 
 - name: Tune sysctl
   become: true
@@ -163,6 +169,8 @@
     mode: "0644"
   notify: Reload sysctl
 
+# Units come from packages and from the copy task above; in check mode
+# neither has happened yet.
 - name: Enable services
   become: true
   ansible.builtin.systemd_service:
@@ -171,6 +179,9 @@
     state: started
     daemon_reload: true
   loop: "{{ services }}"
+  when: >-
+    not (ansible_check_mode and
+    (packages_installed is changed or unit_files is changed))
 
 - name: Add user to groups
   become: true
