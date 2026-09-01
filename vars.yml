@@ -83,10 +83,9 @@ packages:
 
 # zram is replaced by zswap plus a swap file, see docs/decisions.md.
 # The rest are RPMs replaced by a flatpak, or the libvirt layer that
-# Boxes (flatpak) makes unnecessary; qemu-kvm itself stays. dnf also
-# removes what depends on these and, with clean_requirements_on_remove,
-# the dependencies that nothing else needs (see
-# files/etc/dnf/libdnf5.conf.d/local.conf).
+# Boxes (flatpak) makes unnecessary; qemu-kvm itself stays. The remove
+# task also drops what depends on these and the dependencies nothing
+# else needs (allowerasing and autoremove in tasks/system.yml).
 packages_absent:
   - firefox
   - gnome-boxes

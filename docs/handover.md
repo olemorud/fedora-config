@@ -64,8 +64,9 @@ a fixed hour, and nothing may reboot the machine on its own.
 - Virtualisation is the Boxes flatpak plus `qemu-kvm` on the host for
   manual use. libvirt and virt-manager were removed at the owner's
   request (2026-09); do not bring them back.
-- `clean_requirements_on_remove=True` is set explicitly so removals in
-  `packages_absent` take their orphaned dependencies with them.
+- The remove task carries `allowerasing: true` and `autoremove: true`;
+  the dnf5 module needs both to behave like `dnf remove`. See
+  decisions.md before touching either.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
 - No vim plugins at all, by request.
 - Updates are downloaded automatically and never installed:

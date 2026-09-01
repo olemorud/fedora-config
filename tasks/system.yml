@@ -85,11 +85,20 @@
     allowerasing: true
     state: present
 
+# allowerasing: the dnf5 CLI always allows erasing on remove, so
+# dependents of a removed package go with it; the module does not, and
+# fails to resolve instead (libreoffice-writer vs libreoffice-core).
+# autoremove: the module overrides clean_requirements_on_remove with
+# this flag, so without it every removal leaves its dependencies behind.
+# It also drops already-orphaned dependencies anywhere on the system;
+# `dnf mark user <pkg>` protects one that should stay.
 - name: Remove packages
   become: true
   ansible.builtin.dnf5:
     name: "{{ packages_absent }}"
     state: absent
+    allowerasing: true
+    autoremove: true
   notify: Stop zram
 
 - name: Set system locale

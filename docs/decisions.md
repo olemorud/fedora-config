@@ -37,15 +37,20 @@ Short notes on choices that are not obvious from the code.
   directory before creating VMs.
   Images from the old libvirt setup are left in place under
   `/var/lib/libvirt/images`; delete or import them by hand.
-- Package removal: `clean_requirements_on_remove=True` is dnf5's
-  default and is stated in `files/etc/dnf/libdnf5.conf.d/local.conf`.
-  With it, `packages_absent` also drops the dependencies pulled in for
-  those packages that nothing else needs. It only touches packages
-  whose install reason is "Dependency" or "Weak dependency", never
-  something installed by name or by a group. Leftovers from removals
-  done by hand before this config are cleaned once with
-  `dnf autoremove`; not automated, because autoremove acts on the
-  whole system and would silently take a library someone is using.
+- Package removal. The Ansible `dnf5` module differs from the CLI in
+  two ways that matter here, both fixed on the remove task:
+  `allowerasing: true`, because the CLI always allows erasing on
+  remove (dependents go with the package) while the module fails to
+  resolve instead; and `autoremove: true`, because the module sets
+  `clean_requirements_on_remove` from that flag, ignoring dnf.conf, so
+  without it every removal leaves its dependencies behind. The flag
+  also removes dependencies orphaned earlier anywhere on the system.
+  That only ever touches packages with install reason "Dependency" or
+  "Weak dependency", never one installed by name or from a group, and
+  `dnf mark user <pkg>` pins one that should stay. `make check` lists
+  what a run would take. `clean_requirements_on_remove=True` in
+  `files/etc/dnf/libdnf5.conf.d/local.conf` is the default, stated for
+  removals done by hand.
 - Thunderbird is the Fedora flatpak `net.thunderbird.Thunderbird`
   (remote `fedora`, branch `stable`), which follows Fedora's RPM and so
   the release (monthly) channel. Flathub's `org.mozilla.thunderbird` /
