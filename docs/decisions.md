@@ -153,6 +153,32 @@ locale (`%d/%m/%y`, 24-hour, no AM/PM); `en_GB` has the same date but
 defines an AM/PM format so GNOME may pick 12h. Change `locale` in
 `vars.yml`. Takes effect at next login.
 
+**Availability.** A locale has to be built before `LANG` can use it.
+`glibc-langpack-en` ships prebuilt `en_DK`, along with the other 18
+English territories (en_AG, en_AU, en_BW, en_CA, en_DK, en_GB, en_HK,
+en_IE, en_IL, en_IN, en_NG, en_NZ, en_PH, en_SC, en_SG, en_US, en_ZA,
+en_ZM, en_ZW), so on this machine no generation step is needed. Fedora
+does not ship `glibc-all-langpacks` on Workstation, so a locale outside
+the installed langpacks would simply not exist and `LANG` would fall
+back to C.UTF-8.
+
+The playbook therefore checks `locale -a` and runs `localedef` when the
+locale is missing, which is why `glibc-locale-source` is in the package
+list (`/usr/share/i18n/locales`; the charmaps come from `glibc-common`).
+The check is the reason for the Jinja in the task: `locale -a` prints
+the *normalized* name, `en_DK.utf8`, not `en_DK.UTF-8`, so the codeset
+has to be lowercased and stripped of its dash before comparing. This is
+also the usual reason a locale looks absent when it is not:
+
+    locale -a | grep -i en_dk        # en_DK, en_DK.utf8
+    grep -i en_dk <(locale -a)       # same
+    locale -a | grep en_DK.UTF-8     # finds nothing, always
+
+A locale added by `localedef` goes into `/usr/lib/locale/locale-archive`
+and can be dropped when glibc's `%post` rebuilds that archive from the
+installed langpacks. The task is idempotent and runs every time, so the
+next `make apply` puts it back.
+
 ## Btrfs compression: zstd:3
 
 Fedora mounts `/` and `/home` with `compress=zstd:1`. This config raises

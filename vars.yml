@@ -35,6 +35,7 @@ packages:
   - git-credential-libsecret
   - git-lfs
   - glibc-langpack-en
+  - glibc-locale-source         # localedef, if the langpack lacks a locale
   - gnupg2
   - htop
   - jq
