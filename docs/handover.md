@@ -70,6 +70,11 @@ a fixed hour, and nothing may reboot the machine on its own.
   (Gigabyte B550 ACPI firmware bug), in `tasks/machine.yml`.
 - Machine-specific config split into `machine.yml` (vars) and
   `tasks/machine.yml` (fact-gated workarounds); see decisions.md.
+- Iteration time: tag-scoped runs (`make apply TAGS=desktop`), an hour
+  of fact caching, a trimmed `gather_subset`, and a stat guard so RPM
+  Fusion does not start dnf for nothing. `profile_tasks` prints the ten
+  slowest tasks after every run; tune from those numbers, not by guess.
+  See decisions.md for what was deliberately left alone.
 - Removed from scope by the owner: chezmoi, toolbx/distrobox, any
   dotfile manager.
 
@@ -108,6 +113,8 @@ Not verified, because it needs the real machine:
   `systemctl show dnf5-automatic.timer -p Persistent -p TimersCalendar`
   and, after a day or two, `journalctl -u dnf5-automatic.service`.
   `dnf5 automatic --no-installupdates` runs it by hand.
+- The RPM Fusion stat guard, on a machine that does not have the repos
+  yet. It has only been exercised in the already-installed direction.
 
 ## Open items
 
@@ -143,8 +150,9 @@ Not verified, because it needs the real machine:
 ```
 edit vars.yml or a task file
 make lint
-make check          # dry run with diff
-make apply
+make check TAGS=system   # dry run with diff, scoped while iterating
+make apply TAGS=system
+make apply               # full pass before committing
 git commit
 ```
 

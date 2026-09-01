@@ -72,7 +72,15 @@ curl -fsSL <repo-raw-url>/bootstrap.sh | bash
 make apply     # ansible-playbook -K playbook.yml
 make check     # dry run with diff
 make lint      # yamllint, ansible-lint, syntax check, shellcheck
+
+# Scope a run while iterating; tags are machine, system, desktop, user
+make apply TAGS=desktop
+make check TAGS=system
 ```
+
+Every run prints its ten slowest tasks. Facts are cached for an hour, so
+a second run in the same session skips gathering; clear
+`~/.cache/ansible/facts` after a hardware or disk change.
 
 ## Maintenance
 

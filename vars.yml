@@ -75,6 +75,8 @@ packages:
 
   # Needed by this playbook
   - ansible-core
+  # profile_tasks, the callback that times each task
+  - ansible-collection-ansible-posix
   - ansible-collection-community-general
   - python3-psutil              # community.general.dconf
   - python3-ansible-lint

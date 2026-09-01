@@ -28,15 +28,28 @@
     mode: "0644"
   notify: Reload systemd
 
+# Two dnf transactions that are a no-op on every run after the first,
+# and a dnf transaction costs seconds. A stat is free, so check for the
+# repo file the release package drops and skip when it is there.
+- name: Check for RPM Fusion
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-{{ item }}.repo
+  register: rpmfusion_repos
+  loop: [free, nonfree]
+
 - name: Enable RPM Fusion
   become: true
   ansible.builtin.dnf5:
     name: >-
-      {{ rpmfusion_url }}/{{ item }}/fedora/rpmfusion-{{ item }}-release-{{
-      ansible_facts['distribution_major_version'] }}.noarch.rpm
+      {{ rpmfusion_url }}/{{ item.item }}/fedora/rpmfusion-{{ item.item
+      }}-release-{{ ansible_facts['distribution_major_version']
+      }}.noarch.rpm
     disable_gpg_check: true
     state: present
-  loop: [free, nonfree]
+  loop: "{{ rpmfusion_repos.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: not item.stat.exists
 
 - name: Install packages
   become: true

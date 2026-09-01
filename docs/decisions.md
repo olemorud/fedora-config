@@ -298,8 +298,44 @@ Suspend/Sleep in Gigabyte B550i Aorus Pro AX" (2023-04-09);
 pliszko.com "Fixing instant wake from suspend on Gigabyte
 motherboards" (2025-07-31).
 
+## Iteration time
+
+A full run is dominated by things that are no-ops once the machine is
+configured. What was done about it, cheapest first:
+
+- **Scope the run.** The play is tagged `machine`, `system`, `desktop`,
+  `user`, and the Makefile takes a `TAGS` variable, so editing a dconf
+  key means `make apply TAGS=desktop` instead of a full pass. This is
+  the largest win by far and costs nothing.
+- **Cache facts.** `gathering = smart` with the `jsonfile` cache in
+  `~/.cache/ansible/facts` and a one-hour timeout. The second run in a
+  session has no "Gathering Facts" task at all. One hour is chosen so
+  the cache cannot go stale across days without anyone noticing; delete
+  the directory after changing disks or hardware.
+- **Gather less.** `gather_subset: [min, hardware]`. The playbook reads
+  `distribution_major_version` and the user facts (from `min`) and
+  `mounts` and `board_name` (from `hardware`). Network, virtual and the
+  ssh key subsets are not read by anything.
+- **Do not start dnf when there is nothing to do.** Enabling RPM Fusion
+  was two dnf transactions on every run, each of which loads the repo
+  metadata before concluding the release package is already installed.
+  A `stat` on `/etc/yum.repos.d/rpmfusion-{free,nonfree}.repo` decides
+  whether to run them at all.
+- **Measure.** `ansible.posix.profile_tasks` is enabled, so every run
+  ends with its ten slowest tasks. The remaining candidates are the
+  three dnf tasks (install, freeworld, remove), which each pay for a
+  metadata load, and the flatpak tasks. Both were left alone: the dnf
+  split exists because only the freeworld list may use `allowerasing`,
+  and neither has been shown to be the bottleneck yet. Look at the
+  numbers before cutting further.
+
+Not done, deliberately: mitogen (extra tooling, out of scope),
+`install_weak_deps = False` (changes what gets installed, not just how
+fast), and merging the dnf tasks (see above).
+
 ## Linting
 
 `make lint` runs yamllint, ansible-lint (production profile), a playbook
 syntax check and shellcheck. `.yamllint` is set to 80 columns and the
-octal/comment rules ansible-lint requires.
+octal/comment rules ansible-lint requires. `make lint TAGS=...` is not
+a thing; lint always covers the whole tree.

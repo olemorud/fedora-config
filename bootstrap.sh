@@ -17,7 +17,8 @@ else
 fi
 
 echo "==> Installing git and ansible"
-sudo dnf install -y git ansible-core ansible-collection-community-general
+sudo dnf install -y git ansible-core \
+    ansible-collection-community-general ansible-collection-ansible-posix
 
 if [ ! -d "$DIR/.git" ]; then
     echo "==> Cloning $REPO to $DIR"

@@ -2,6 +2,9 @@
 - name: Configure this Fedora Workstation
   hosts: localhost
   connection: local
+  # Everything the playbook reads: distribution and user from min, mounts
+  # and board_name from hardware. Skips network, virtual and the rest.
+  gather_subset: [min, hardware]
   vars_files:
     - vars.yml
     - machine.yml
