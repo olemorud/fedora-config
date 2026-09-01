@@ -20,6 +20,43 @@
     remote: fedora
     state: present
 
+# Every flatpak data dir is its own btrfs subvolume. btrfs snapshots
+# do not descend into nested subvolumes, so app data is excluded from
+# backups (see github.com/olemorud/fedora-backup). A subvolume root
+# always has inode 256, which makes the conversion idempotent. Done
+# right after install, before an app's first run creates the dir.
+- name: Stat flatpak data dirs
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.var/app/{{ item }}"
+  loop: "{{ flatpaks + flatpaks_fedora }}"
+  register: flatpak_data_dirs
+
+- name: Pre-create missing flatpak data dirs as subvolumes
+  ansible.builtin.command: >-
+    btrfs subvolume create
+    {{ ansible_facts['user_dir'] }}/.var/app/{{ item.item }}
+  changed_when: true
+  loop: "{{ flatpak_data_dirs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: not item.stat.exists
+
+- name: Convert existing flatpak data dirs to subvolumes
+  ansible.builtin.shell: |
+    set -euo pipefail
+    cd "{{ ansible_facts['user_dir'] }}/.var/app"
+    mv "{{ item.item }}" "{{ item.item }}.old"
+    btrfs subvolume create "{{ item.item }}"
+    cp -a --reflink=always "{{ item.item }}.old/." "{{ item.item }}/"
+    rm -rf "{{ item.item }}.old"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  loop: "{{ flatpak_data_dirs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists and item.stat.inode | int != 256
+
 - name: Apply dconf settings
   community.general.dconf:
     key: "{{ item.key }}"
