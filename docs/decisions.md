@@ -11,9 +11,40 @@ Short notes on choices that are not obvious from the code.
 - No GPU driver packages: amdgpu and Mesa are in the base install.
   `steam-devices` is the only hardware-related extra (controller udev
   rules for the Steam flatpak).
-- Flatpak is used for end-user GUI apps. virt-manager is an RPM because it
-  needs libvirt on the host. Libvirt uses the modular `virt*d` sockets;
-  `libvirtd.service` is deprecated.
+- Flatpak is used for end-user GUI apps that are large, third-party or
+  independent of the GNOME release: Firefox, Thunderbird, LibreOffice,
+  Boxes, Media Writer, Steam and the chat clients. GNOME's own small
+  apps (Calculator, Clocks, Papers, Loupe, Text Editor, ...) stay as
+  the Workstation RPMs: they are a few MB each, share the GTK stack the
+  shell already needs, and the flatpak versions lose host hooks such
+  as PDF thumbnails in Nautilus and `gnome-text-editor file` from a
+  terminal. Moving them would add entries without removing anything
+  worth removing.
+- LibreOffice as `org.libreoffice.LibreOffice` is the one large win:
+  `libreoffice-core` and its dependents (`unoconv`, the `libreoffice-*`
+  subpackages) and the fonts and filter libraries only they need leave
+  the host. Anything that needs headless conversion on the host is
+  `flatpak run --command=soffice org.libreoffice.LibreOffice
+  --convert-to ...`.
+- Virtualisation is GNOME Boxes as a flatpak. It bundles its own qemu
+  and a session libvirt, so `libvirt`, `qemu-kvm`, `virt-manager` and
+  their `virt*d` sockets are gone from the host (2026-09). The flatpak
+  only needs `/dev/kvm`, which systemd's default udev rules make
+  mode 0666. VM images live under `~/.var/app/org.gnome.Boxes`, so they
+  are excluded from backups like all flatpak data; they are also
+  plain CoW files, so a VM that writes heavily will fragment. If that
+  is ever felt, `chattr +C` the images directory before creating VMs.
+  Images from the old libvirt setup are left in place under
+  `/var/lib/libvirt/images`; delete or import them by hand.
+- Package removal: `clean_requirements_on_remove=True` is dnf5's
+  default and is stated in `files/etc/dnf/libdnf5.conf.d/local.conf`.
+  With it, `packages_absent` also drops the dependencies pulled in for
+  those packages that nothing else needs. It only touches packages
+  whose install reason is "Dependency" or "Weak dependency", never
+  something installed by name or by a group. Leftovers from removals
+  done by hand before this config are cleaned once with
+  `dnf autoremove`; not automated, because autoremove acts on the
+  whole system and would silently take a library someone is using.
 - Thunderbird is the Fedora flatpak `net.thunderbird.Thunderbird`
   (remote `fedora`, branch `stable`), which follows Fedora's RPM and so
   the release (monthly) channel. Flathub's `org.mozilla.thunderbird` /
@@ -228,7 +259,7 @@ from eating the disk:
   with a 512 MiB mlocked hash table (bees docs: 128 MiB per TB of
   unique data, 2-4x that on a compressed filesystem) and four worker
   threads at idle I/O and nice 19. It skips nodatacow files, so the swap
-  file and libvirt images are untouched. The first full scan takes
+  file is untouched. The first full scan takes
   hours; after that it keeps up incrementally. It runs at `--verbose 4`
   (warnings and errors); the default of 8 logs every crawl and dedupe
   and floods the journal. Levels are 0 (silent) to 8 (all), mapping to

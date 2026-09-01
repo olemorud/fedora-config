@@ -41,7 +41,6 @@ packages:
   - libasan
   - libtool
   - libubsan
-  - libvirt
   - lld
   - lldb
   - make
@@ -57,7 +56,6 @@ packages:
   - python3
   - python3-devel
   - python3-pip
-  - qemu-kvm
   - rclone
   - ripgrep
   - snapper
@@ -68,7 +66,6 @@ packages:
   - valgrind
   - vim-X11                     # vimx: +clipboard, works via XWayland
   - vim-enhanced
-  - virt-manager
   - wl-clipboard
   - zsh
   - zstd
@@ -84,9 +81,18 @@ packages:
   - ShellCheck
 
 # zram is replaced by zswap plus a swap file, see docs/decisions.md.
-# firefox moves to the flatpak, so the RPM goes.
+# The rest are RPMs replaced by a flatpak, or the libvirt stack that
+# Boxes (flatpak) makes unnecessary. dnf also removes what depends on
+# these and, with clean_requirements_on_remove, the dependencies that
+# nothing else needs (files/etc/dnf/libdnf5.conf.d/local.conf).
 packages_absent:
   - firefox
+  - gnome-boxes
+  - libreoffice-core            # takes every libreoffice-* with it
+  - libvirt
+  - mediawriter
+  - qemu-kvm
+  - virt-manager
   - zram-generator-defaults
 
 # flathub. Every flatpak's data dir under ~/.var/app is made a btrfs
@@ -99,7 +105,10 @@ flatpaks:
   - com.github.tchx84.Flatseal
   - com.spotify.Client
   - com.valvesoftware.Steam
+  - org.fedoraproject.MediaWriter
+  - org.gnome.Boxes               # bundles qemu; no libvirt on the host
   - org.gnome.Firmware
+  - org.libreoffice.LibreOffice
   - org.mozilla.firefox
   - org.signal.Signal
 
@@ -112,13 +121,6 @@ services:
   - swap-swapfile.swap
   # Downloads updates only; see files/etc/dnf/automatic.conf.
   - dnf5-automatic.timer
-  # Modular libvirt daemons; libvirtd.service is deprecated.
-  - virtqemud.socket
-  - virtnetworkd.socket
-  - virtstoraged.socket
-
-user_groups:
-  - libvirt
 
 dconf:
   # Region (date, time, numbers, paper) for the GNOME session

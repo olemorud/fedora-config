@@ -33,8 +33,8 @@ a fixed hour, and nothing may reboot the machine on its own.
 ## Layout, beyond the README
 
 - `vars.yml` is the only file that should need editing for routine
-  changes: packages, packages to remove, flatpaks, services, groups,
-  dconf keys, `locale`. `machine.yml` holds hardware-sized values
+  changes: packages, packages to remove, flatpaks, services, dconf
+  keys, `locale`. `machine.yml` holds hardware-sized values
   (`swap_size`, `bees_db_size`) and hardware-only package lists;
   `tasks/machine.yml` holds hardware workarounds, gated on facts.
 - `tasks/system.yml` runs with `become`; `tasks/user.yml` never does.
@@ -58,8 +58,14 @@ a fixed hour, and nothing may reboot the machine on its own.
   in `glibc-langpack-en`, so there is no locale generation step. `locale
   -a` prints `en_DK.utf8`, so grepping for `en_DK.UTF-8` finds nothing
   even when all is well.
-- Flatpak for GUI apps; virt-manager as RPM with modular libvirt
-  sockets.
+- Flatpak for large or third-party GUI apps; GNOME's small core apps
+  stay RPM on purpose (see decisions.md). LibreOffice and Media Writer
+  moved to flatpak 2026-09.
+- Virtualisation is the Boxes flatpak. libvirt, qemu-kvm and
+  virt-manager were removed from the host at the owner's request
+  (2026-09); do not bring them back.
+- `clean_requirements_on_remove=True` is set explicitly so removals in
+  `packages_absent` take their orphaned dependencies with them.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
 - No vim plugins at all, by request.
 - Updates are downloaded automatically and never installed:
@@ -115,6 +121,11 @@ Not verified, because it needs the real machine:
   `dnf5 automatic --no-installupdates` runs it by hand.
 - The RPM Fusion stat guard, on a machine that does not have the repos
   yet. It has only been exercised in the already-installed direction.
+- The 2026-09 removals (`libreoffice-core`, `gnome-boxes`, `libvirt`,
+  `qemu-kvm`, `virt-manager`, `mediawriter`). Expect a transaction of
+  several hundred packages; read the `make check` diff first. The
+  Boxes flatpak has not been started on this machine; if it cannot
+  create a VM, check `ls -l /dev/kvm` (expect `crw-rw-rw-`).
 
 ## Open items
 
