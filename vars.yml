@@ -84,8 +84,18 @@ packages:
   - ShellCheck
 
 # zram is replaced by zswap plus a swap file, see docs/decisions.md.
+# firefox moves to the flatpak, so the RPM goes.
 packages_absent:
+  - firefox
   - zram-generator-defaults
+
+# Flatpak data dirs under ~/.var/app made into btrfs subvolumes, which
+# btrfs send skips, excluding them from backups. See tasks/backup.yml
+# and github.com/olemorud/fedora-backup. Note: for Firefox this means
+# the profile is not backed up either; rely on Firefox Sync.
+backup_excluded_flatpaks:
+  - com.valvesoftware.Steam
+  - org.mozilla.firefox
 
 # flathub
 flatpaks:
@@ -95,6 +105,7 @@ flatpaks:
   - com.spotify.Client
   - com.valvesoftware.Steam
   - org.gnome.Firmware
+  - org.mozilla.firefox
   - org.signal.Signal
 
 # From the fedora remote, not Flathub. See docs/decisions.md.

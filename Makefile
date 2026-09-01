@@ -1,7 +1,7 @@
 .PHONY: apply check lint
 
 # Scope a run while iterating: make apply TAGS=desktop
-# Tags are machine, system, desktop, user; see playbook.yml.
+# Tags are machine, system, desktop, user, backup; see playbook.yml.
 TAGS ?= all
 
 apply:

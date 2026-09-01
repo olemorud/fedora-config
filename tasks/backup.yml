@@ -1,0 +1,50 @@
+---
+# Set up the fedora-backup workflow (github.com/olemorud/fedora-backup).
+# Its tools (btrfs-progs, zstd, gnupg2, rclone) are already in
+# `packages`. Not automated, by design: the rclone remote "b2"
+# (secret, `rclone config` by hand once) and the gpg passphrase
+# (memorized). backup.sh itself stays manual; gpg prompts for the
+# passphrase.
+
+# update: false means this is a clone-once; the checkout tracks main
+# by hand afterwards, so pinning a version would be noise.
+- name: Clone the fedora-backup repository  # noqa: latest[git]
+  ansible.builtin.git:
+    repo: git@github.com:olemorud/fedora-backup.git
+    dest: "{{ ansible_facts['user_dir'] }}/fedora-backup"
+    update: false
+
+# btrfs snapshots do not descend into nested subvolumes, so a data dir
+# that is its own subvolume drops out of every backup. A subvolume root
+# always has inode 256, which makes the conversion idempotent.
+- name: Stat flatpak data dirs excluded from backups
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.var/app/{{ item }}"
+  loop: "{{ backup_excluded_flatpaks }}"
+  register: backup_flatpak_dirs
+
+- name: Pre-create missing flatpak data dirs as subvolumes
+  ansible.builtin.command: >-
+    btrfs subvolume create
+    {{ ansible_facts['user_dir'] }}/.var/app/{{ item.item }}
+  changed_when: true
+  loop: "{{ backup_flatpak_dirs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: not item.stat.exists
+
+- name: Convert existing flatpak data dirs to subvolumes
+  ansible.builtin.shell: |
+    set -euo pipefail
+    cd "{{ ansible_facts['user_dir'] }}/.var/app"
+    mv "{{ item.item }}" "{{ item.item }}.old"
+    btrfs subvolume create "{{ item.item }}"
+    cp -a --reflink=always "{{ item.item }}.old/." "{{ item.item }}/"
+    rm -rf "{{ item.item }}.old"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  loop: "{{ backup_flatpak_dirs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists and item.stat.inode | int != 256

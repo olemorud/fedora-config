@@ -26,6 +26,10 @@
       ansible.builtin.import_tasks: tasks/user.yml
       tags: [user]
 
+    - name: Backup
+      ansible.builtin.import_tasks: tasks/backup.yml
+      tags: [backup]
+
   handlers:
     - name: Reload systemd
       become: true
