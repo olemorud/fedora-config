@@ -27,13 +27,14 @@ Short notes on choices that are not obvious from the code.
   `flatpak run --command=soffice org.libreoffice.LibreOffice
   --convert-to ...`.
 - Virtualisation is GNOME Boxes as a flatpak. It bundles its own qemu
-  and a session libvirt, so `libvirt`, `qemu-kvm`, `virt-manager` and
-  their `virt*d` sockets are gone from the host (2026-09). The flatpak
-  only needs `/dev/kvm`, which systemd's default udev rules make
-  mode 0666. VM images live under `~/.var/app/org.gnome.Boxes`, so they
-  are excluded from backups like all flatpak data; they are also
-  plain CoW files, so a VM that writes heavily will fragment. If that
-  is ever felt, `chattr +C` the images directory before creating VMs.
+  and a session libvirt, so `libvirt`, `virt-manager` and the `virt*d`
+  sockets are gone from the host (2026-09). `qemu-kvm` stays for
+  running qemu by hand; its `80-kvm.rules` also keeps `/dev/kvm` at
+  mode 0666, which is all the flatpak needs. VM images live under
+  `~/.var/app/org.gnome.Boxes`, so they are excluded from backups like
+  all flatpak data; they are also plain CoW files, so a VM that writes
+  heavily will fragment. If that is ever felt, `chattr +C` the images
+  directory before creating VMs.
   Images from the old libvirt setup are left in place under
   `/var/lib/libvirt/images`; delete or import them by hand.
 - Package removal: `clean_requirements_on_remove=True` is dnf5's

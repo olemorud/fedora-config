@@ -56,6 +56,7 @@ packages:
   - python3
   - python3-devel
   - python3-pip
+  - qemu-kvm                    # direct qemu use; Boxes bundles its own
   - rclone
   - ripgrep
   - snapper
@@ -81,17 +82,17 @@ packages:
   - ShellCheck
 
 # zram is replaced by zswap plus a swap file, see docs/decisions.md.
-# The rest are RPMs replaced by a flatpak, or the libvirt stack that
-# Boxes (flatpak) makes unnecessary. dnf also removes what depends on
-# these and, with clean_requirements_on_remove, the dependencies that
-# nothing else needs (files/etc/dnf/libdnf5.conf.d/local.conf).
+# The rest are RPMs replaced by a flatpak, or the libvirt layer that
+# Boxes (flatpak) makes unnecessary; qemu-kvm itself stays. dnf also
+# removes what depends on these and, with clean_requirements_on_remove,
+# the dependencies that nothing else needs (see
+# files/etc/dnf/libdnf5.conf.d/local.conf).
 packages_absent:
   - firefox
   - gnome-boxes
   - libreoffice-core            # takes every libreoffice-* with it
   - libvirt
   - mediawriter
-  - qemu-kvm
   - virt-manager
   - zram-generator-defaults
 

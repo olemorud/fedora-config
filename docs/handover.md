@@ -61,9 +61,9 @@ a fixed hour, and nothing may reboot the machine on its own.
 - Flatpak for large or third-party GUI apps; GNOME's small core apps
   stay RPM on purpose (see decisions.md). LibreOffice and Media Writer
   moved to flatpak 2026-09.
-- Virtualisation is the Boxes flatpak. libvirt, qemu-kvm and
-  virt-manager were removed from the host at the owner's request
-  (2026-09); do not bring them back.
+- Virtualisation is the Boxes flatpak plus `qemu-kvm` on the host for
+  manual use. libvirt and virt-manager were removed at the owner's
+  request (2026-09); do not bring them back.
 - `clean_requirements_on_remove=True` is set explicitly so removals in
   `packages_absent` take their orphaned dependencies with them.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
@@ -122,7 +122,7 @@ Not verified, because it needs the real machine:
 - The RPM Fusion stat guard, on a machine that does not have the repos
   yet. It has only been exercised in the already-installed direction.
 - The 2026-09 removals (`libreoffice-core`, `gnome-boxes`, `libvirt`,
-  `qemu-kvm`, `virt-manager`, `mediawriter`). Expect a transaction of
+  `virt-manager`, `mediawriter`). Expect a transaction of
   several hundred packages; read the `make check` diff first. The
   Boxes flatpak has not been started on this machine; if it cannot
   create a VM, check `ls -l /dev/kvm` (expect `crw-rw-rw-`).
