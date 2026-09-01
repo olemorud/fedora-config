@@ -25,6 +25,7 @@ packages:
   - cmake
   - compsize
   - cppcheck
+  - dnf5-plugin-automatic       # background download of updates
   - fd-find
   - fio                         # Disk benchmarking
   - gcc
@@ -101,6 +102,8 @@ flatpaks_fedora:
 services:
   - zswap.service
   - swap-swapfile.swap
+  # Downloads updates only; see files/etc/dnf/automatic.conf.
+  - dnf5-automatic.timer
   # Modular libvirt daemons; libvirtd.service is deprecated.
   - virtqemud.socket
   - virtnetworkd.socket

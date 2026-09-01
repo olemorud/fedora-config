@@ -6,6 +6,28 @@
     dest: /etc/dnf/libdnf5.conf.d/local.conf
     mode: "0644"
 
+- name: Configure automatic updates
+  become: true
+  ansible.builtin.copy:
+    src: etc/dnf/automatic.conf
+    dest: /etc/dnf/automatic.conf
+    mode: "0644"
+
+- name: Create the dnf5-automatic timer drop-in directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/dnf5-automatic.timer.d
+    state: directory
+    mode: "0755"
+
+- name: Schedule automatic updates
+  become: true
+  ansible.builtin.copy:
+    src: etc/systemd/system/dnf5-automatic.timer.d/desktop.conf
+    dest: /etc/systemd/system/dnf5-automatic.timer.d/desktop.conf
+    mode: "0644"
+  notify: Reload systemd
+
 - name: Enable RPM Fusion
   become: true
   ansible.builtin.dnf5:

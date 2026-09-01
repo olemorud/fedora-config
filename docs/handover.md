@@ -1,6 +1,6 @@
 # Handover
 
-State of the project as of 2026-08-26, for whoever picks it up next
+State of the project as of 2026-09-01, for whoever picks it up next
 (including a future AI session). Read `README.md` first; this file is the
 context that does not belong there.
 
@@ -11,6 +11,10 @@ to a usable state and can be re-run at any time to converge it. One
 machine: Ryzen 7 5700X3D, RX 6800, 32 GiB, one 960 GB NVMe, Btrfs,
 Fedora 44, GNOME 50 on Wayland. Owner's GitHub is `olemorud`; the repo
 is `github.com/olemorud/fedora-config`.
+
+It is a desktop, not a server: powered off at night, booted when it is
+used. Anything scheduled has to catch up after boot rather than fire at
+a fixed hour, and nothing may reboot the machine on its own.
 
 ## Conventions the owner cares about
 
@@ -55,6 +59,10 @@ is `github.com/olemorud/fedora-config`.
   sockets.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
 - No vim plugins at all, by request.
+- Updates are downloaded automatically and never installed:
+  `dnf5-plugin-automatic` with `apply_updates = no`, `reboot = never`.
+  The timer drop-in replaces the stock 06:00 schedule with `daily` plus
+  `Persistent=true`, so the run happens on the first boot of the day.
 - Suspend fix: `fix-suspend.service` disables GPP0 wakeup at boot
   (Gigabyte B550 ACPI firmware bug), in `tasks/machine.yml`.
 - Machine-specific config split into `machine.yml` (vars) and
@@ -93,6 +101,10 @@ Not verified, because it needs the real machine:
   fstab, idempotent on the second pass).
 - `fix-suspend.service`: confirm GPP0 is the wakeup source on this
   board and that suspend stays asleep after the service runs.
+- The dnf5-automatic timer. Check the schedule took with
+  `systemctl show dnf5-automatic.timer -p Persistent -p TimersCalendar`
+  and, after a day or two, `journalctl -u dnf5-automatic.service`.
+  `dnf5 automatic --no-installupdates` runs it by hand.
 
 ## Open items
 
@@ -112,6 +124,14 @@ Not verified, because it needs the real machine:
    writes cold pages to the swap file; if that matters, LUKS or an
    encrypted swap via `/etc/crypttab` is the next step.
 5. Hibernation is unsupported by design.
+6. GNOME Software downloads updates in the background as well, into
+   PackageKit's cache rather than dnf's, so the same payload can be
+   fetched twice. `/org/gnome/software/download-updates` set to `false`
+   stops it, at the cost of background flatpak updates. Left at the
+   default until the duplication is actually seen.
+7. Downloaded packages sit in `/var/cache/libdnf5` until the next
+   successful transaction. Harmless on a 960 GB disk, but it is the
+   reason not to raise the timer frequency.
 
 ## How to make a change
 

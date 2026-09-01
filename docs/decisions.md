@@ -95,6 +95,50 @@ Sources: Chris Down, "Debunking zswap and zram myths" (2026-03-24) and
 `CONFIG_CRYPTO_ZSTD=m`); Fedora change "SwapOnZRAM"; btrfs-progs
 Swapfile documentation.
 
+## Automatic updates: download only
+
+`dnf5-plugin-automatic` runs from `dnf5-automatic.timer` and is
+configured in `/etc/dnf/automatic.conf` (overrides on top of
+`/usr/share/dnf5/dnf5-plugins/automatic.conf`). This config sets
+`download_updates = yes`, `apply_updates = no`, `reboot = never`.
+
+**Why download but not install.** With `apply_updates = no` the RPMs
+stay in `/var/cache/libdnf5` until the next successful transaction, so a
+later `dnf upgrade` is a local, near-instant operation and the slow part
+has already happened in the background. Nothing is swapped underneath a
+running session: replacing files under a live GNOME or browser is what
+produces the classic "restart required" breakage, and unattended kernel
+or systemd upgrades on a desktop invite a reboot the owner did not ask
+for. Installing stays a deliberate act. `reboot = never` is the default
+and is set explicitly so it survives a change of upstream defaults.
+
+**Why the timer is overridden.** The stock unit is
+`OnCalendar=*-*-* 6:00` with an hour of randomized delay. This machine
+is powered off at night, so that time never comes around and the job
+would never run. The drop-in
+`files/etc/systemd/system/dnf5-automatic.timer.d/desktop.conf` clears
+`OnCalendar`, asks for `daily`, and sets `Persistent=true`. systemd then
+stores the last run in `/var/lib/systemd/timers` and runs the missed job
+after boot instead of waiting for the next calendar match.
+`RandomizedDelaySec=30m` applies to catch-up runs too, which keeps the
+download from starting on top of login. Net effect: one download run per
+day, about half an hour into the first session of that day.
+
+`random_sleep` stays 0 because the systemd delay already covers it, and
+`network_online_timeout` is raised from 60 to 300 s because the run
+usually starts while NetworkManager is still settling after boot.
+
+Not done: GNOME Software also refreshes and downloads in the background,
+into PackageKit's cache rather than dnf's, so the same payload can be
+fetched twice. Turning that off is one dconf key,
+`/org/gnome/software/download-updates`, but it also stops background
+fetching of flatpak updates. Left at the default until the duplication
+is actually observed.
+
+Sources: dnf5 `automatic.8` (config file format, `[commands]` and
+`[emitters]` sections); `systemd.timer(5)` on `Persistent` and
+`RandomizedDelaySec`.
+
 ## Locale
 
 `en_DK.UTF-8`: English messages, 24-hour clock, ISO 8601 dates
