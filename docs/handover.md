@@ -54,11 +54,10 @@ a fixed hour, and nothing may reboot the machine on its own.
 - zswap is enabled by `zswap.service`, not a kernel argument, because
   zstd is a module in the Fedora kernel.
 - Locale `en_DK.UTF-8` (24 h, ISO dates). `en_IE` noted as the
-  dd/mm alternative. `glibc-langpack-en` already ships prebuilt `en_DK`,
-  but the playbook checks `locale -a` and runs `localedef` if the locale
-  is missing, so a different `locale` in `vars.yml` also works. Note
-  that `locale -a` prints `en_DK.utf8`; grepping for `en_DK.UTF-8` finds
-  nothing even when all is well.
+  dd/mm alternative. Confirmed present on the machine; it comes prebuilt
+  in `glibc-langpack-en`, so there is no locale generation step. `locale
+  -a` prints `en_DK.utf8`, so grepping for `en_DK.UTF-8` finds nothing
+  even when all is well.
 - Flatpak for GUI apps; virt-manager as RPM with modular libvirt
   sockets.
 - `vim-X11` for `vimx` (+clipboard); `vim` is aliased to it in zsh.
@@ -109,9 +108,6 @@ Not verified, because it needs the real machine:
   `systemctl show dnf5-automatic.timer -p Persistent -p TimersCalendar`
   and, after a day or two, `journalctl -u dnf5-automatic.service`.
   `dnf5 automatic --no-installupdates` runs it by hand.
-- The `localedef` fallback for the locale. It is a no-op on this machine
-  because `glibc-langpack-en` already provides `en_DK.utf8`, so the
-  branch has never actually executed.
 
 ## Open items
 

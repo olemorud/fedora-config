@@ -78,25 +78,6 @@
     state: absent
   notify: Stop zram
 
-- name: List available locales
-  ansible.builtin.command: locale -a
-  register: locales
-  changed_when: false
-
-# locale -a prints the normalized name, en_DK.utf8 rather than
-# en_DK.UTF-8, so compare against that. glibc-langpack-en covers en_DK
-# today; this is the fallback for a locale no installed langpack builds.
-- name: Generate the locale
-  become: true
-  ansible.builtin.command: >-
-    localedef --inputfile {{ locale | split('.') | first }}
-    --charmap {{ locale | split('.') | last }} {{ locale }}
-  changed_when: true
-  when: >-
-    locale | split('.') | first ~ '.' ~
-    (locale | split('.') | last | replace('-', '') | lower)
-    not in locales.stdout_lines
-
 - name: Set system locale
   become: true
   ansible.builtin.lineinfile:
